@@ -1,0 +1,32 @@
+{
+    "name": "pino-logger",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js | pino -m msg",
+        "start_cluster": "node cluster_server.js | pino -m msg",
+        "start:env": "node -r dotenv/config server.js | pino -m msg",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "waleed",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "1.18.2",
+        "bunyan": "^1.8.12",
+        "child_process": "1.0.2",
+        "cuid": "2.1.1",
+        "dotenv": "^5.0.1",
+        "ejs": "2.5.8",
+        "express": "^4.16.3",
+        "guid": "0.0.12",
+        "json-cycle": "1.3.0",
+        "lodash": "4.17.5",
+        "nodemon": "1.17.2",
+        "pino": "^4.17.3",
+        "pino-multi-stream": "^3.1.2"
+    },
+    "config": {
+        "port": "3001"
+    }
+}
