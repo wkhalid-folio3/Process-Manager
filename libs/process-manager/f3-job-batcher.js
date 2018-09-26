@@ -1,9 +1,9 @@
-const logger = (require('./f3-logger')).initiateLog('pino');
+const logger = (require('../f3-logger')).initiateLog('pino');
 
 
 let spawnedJobs = [
-    './processes/executers/item-export.js',
-    './processes/executers/unresolved-job.js'
+    './libs/process-manager/processes/executers/item-export.js',
+    './libs/process-manager/processes/executers/unresolved-job.js'
 ];
 
 const processMessageParser = {

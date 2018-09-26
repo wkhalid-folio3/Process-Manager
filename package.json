@@ -24,7 +24,8 @@
         "lodash": "4.17.5",
         "nodemon": "1.17.2",
         "pino": "^4.17.3",
-        "pino-multi-stream": "^3.1.2"
+        "pino-multi-stream": "^3.1.2",
+        "uuid": "3.3.2"
     },
     "config": {
         "port": "3001"

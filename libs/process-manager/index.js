@@ -1,6 +1,6 @@
 const { fork } = require("child_process");
-const batchJobs = require('./f3-job-batcher');
-const logger = (require('./f3-logger')).initiateLog('pino');
+const batchJobs = require('./f3-job-batcher').EXECUTERS;
+const logger = (require('../f3-logger')).initiateLog('pino');
 const forked = [];
 const maxCores = require('os').cpus().length;
 const availableOperations = ["ITEM_EXPORT"];
@@ -34,8 +34,8 @@ const isCoreAvailable = () => {
  */
 const childProcessMessageProcessor = msg => {
     logger.debug({
-            operation: `message from childjob :: ${batchJobs[jobJson.job]}`,
-            logDetails: { available_cores: occupiedCores, child_msg: msg }
+            operation: `message from childjob :: ${msg}`,
+            logDetails: { available_cores: maxCores - occupiedCores, child_msg: msg }
         },
         'Process Manager >> Message from Child Job'
     );
@@ -47,7 +47,7 @@ const childProcessMessageProcessor = msg => {
  */
 const onChildProcessClose = msg => {
     logger.debug({
-            operation: `closing :: ${batchJobs[jobJson.job]}`,
+            operation: `closing :: ${msg}`,
             logDetails: { available_cores: occupiedCores, exit_code: msg }
         },
         'Process Manager >> Closing Process'
@@ -61,7 +61,7 @@ const onChildProcessClose = msg => {
  */
 const onChildProcessExit = msg => {
     logger.debug({
-            operation: `exiting :: ${batchJobs[jobJson.job]}`,
+            operation: `exiting :: ${msg}}`,
             logDetails: { available_cores: occupiedCores, exit_code: msg }
         },
         'Process Manager >> Exiting Process'
@@ -73,10 +73,10 @@ const onChildProcessExit = msg => {
  * function processes response when child process DISCONNECTS.
  * @param {JOB to perform in JSON} msg 
  */
-const onChildProcessDisconnect = () => {
+const onChildProcessDisconnect = (jobJson) => {
     logger.debug({
-            operation: `forking:: ${batchJobs[jobJson.job]}`,
-            logDetails: { available_cores: occupiedCores, job_json: jobJson }
+            operation: `forking:: 'adasd'`,
+            logDetails: { available_cores: maxCores - occupiedCores, job_json: jobJson }
         },
         'Process Manager >> Forking Process'
     );
@@ -96,22 +96,26 @@ const forkJob = (jobJson) => {
             },
             'Process Manager >> Forking Process'
         );
-        forked[index] = fork(batchJobs[jobJson.job]);
+        forked[forked.length] = fork(batchJobs[jobJson.job]);
         occupyResource();
+        forked[forked.length - 1].on("message", childProcessMessageProcessor);
+        forked[forked.length - 1].on("close", onChildProcessClose);
+        forked[forked.length - 1].on("exit", onChildProcessExit);
+        forked[forked.length - 1].on("disconnect", onChildProcessDisconnect);
+        forked[forked.length - 1].send(jobJson);
+        return { status: "FORKED", job: jobJson.job };
+    } else if (isCoreAvailable()) {
+        forked[forked.length] = fork(errHandlingProcess);
+        occupyResource();
+        forked[forked.length - 1].on("message", childProcessMessageProcessor);
+        forked[forked.length - 1].on("close", onChildProcessClose);
+        forked[forked.length - 1].on("exit", onChildProcessExit);
+        forked[forked.length - 1].on("disconnect", onChildProcessDisconnect);
+        forked[forked.length - 1].send(job_json);
+        return { status: "FORKED", job: errHandlingProcess };
     } else {
-        forked[index] = fork(errHandlingProcess);
-        occupyResource();
+        return { status: "ENQUEUE", job: jobJson.job };
     }
-
-    forked[index].on("message", childProcessMessageProcessor);
-
-    forked[index].on("close", onChildProcessClose);
-
-    forked[index].on("exit", onChildProcessExit);
-
-    forked[index].on("disconnect", onChildProcessDisconnect);
-
-    forked[index].send(job_json);
 };
 
 module.exports = {
